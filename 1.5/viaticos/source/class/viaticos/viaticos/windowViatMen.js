@@ -6,8 +6,8 @@ qx.Class.define("viaticos.viaticos.windowViatMen",
 	this.base(arguments);
 	
 	this.set({
-		width: 850,
-		height: 570,
+		width: 900,
+		height: 600,
 		showMinimize: false,
 		showMaximize: false
 	});
@@ -475,9 +475,19 @@ qx.Class.define("viaticos.viaticos.windowViatMen",
 	var btnBorrar = new qx.ui.form.Button("Borrar");
 	btnBorrar.setEnabled(estado!="L");
 	btnBorrar.addListener("execute", function(e){
-		lstLocalidad.removeAll();
-		cboLocalidadSel.setValue("");
-		cboLocalidadSel.focus();
+		var index, length, children;
+		
+		if (! lstLocalidad.isSelectionEmpty()) {
+			index = lstLocalidad.indexOf(lstLocalidad.getSelection()[0]);
+			lstLocalidad.remove(lstLocalidad.getSelection()[0]);
+			children = lstLocalidad.getChildren();
+			length = children.length;
+			if (length > 0) {
+				if (index <= length - 1) lstLocalidad.setSelection([children[index]]); else lstLocalidad.setSelection([children[length - 1]]);
+			}
+			cboLocalidadSel.setValue("");
+			cboLocalidadSel.focus();
+		}
 	});
 	
 	

@@ -6,8 +6,8 @@ qx.Class.define("viaticos.viaticos.windowViatico",
 	this.base(arguments);
 	
 	this.set({
-		width: 850,
-		height: 570,
+		width: 900,
+		height: 600,
 		showMinimize: false,
 		showMaximize: false
 	});
@@ -353,9 +353,16 @@ qx.Class.define("viaticos.viaticos.windowViatico",
 	form.add(txtCantDiasAlojam, "Cant.dias alojam.", null, "cant_dias_alojam1", null, {enabled: estado!="L", grupo: 1, item: {row: 11, column: 1, colSpan: 2}});
 	
 	var txtMontoDiarioAlojam = new qx.ui.form.Spinner(0, 0, 100000);
+	txtMontoDiarioAlojam.getChildControl("upbutton").setVisibility("excluded");
+	txtMontoDiarioAlojam.getChildControl("downbutton").setVisibility("excluded");
+	txtMontoDiarioAlojam.setSingleStep(0);
+	txtMontoDiarioAlojam.setPageStep(0);
+	txtMontoDiarioAlojam.setWidth(60);
 	txtMontoDiarioAlojam.setNumberFormat(numberformatMonto);
+	txtMontoDiarioAlojam.setEnabled(estado!="L");
 	txtMontoDiarioAlojam.addListener("changeValue", function(e){
 		lblDiarioAlojam.setValue("* " + numberformatMontoEs.format(txtMontoDiarioAlojam.getValue()));
+		sumar();
 	});
 	form.add(txtMontoDiarioAlojam, "M.diario", null, "monto_diario_alojam");
 	
@@ -544,6 +551,9 @@ qx.Class.define("viaticos.viaticos.windowViatico",
 	
 
 	var lblDiarioViatico = new qx.ui.basic.Label("");
+	
+	var lblDiarioAlojam = new qx.ui.basic.Label("");
+	//this.add(lblDiarioAlojam, {left: 170, top: 315});
 
 	//this.add(new qx.ui.basic.Label("*"), {left: 185, top: 279});
 	
@@ -561,9 +571,14 @@ qx.Class.define("viaticos.viaticos.windowViatico",
 		
 		this.add(txtAdicionalViatico, {left: 290, top: 283});
 		txtAdicionalViatico.setTabIndex(17);
+		
+		this.add(new qx.ui.basic.Label("*"), {left: 162, top: 315});
+		this.add(txtMontoDiarioAlojam, {left: 170, top: 311});
+		txtMontoDiarioAlojam.setTabIndex(18);
 	} else {
 		this.add(lblDiarioViatico, {left: 170, top: 287});
 		this.add(lblAdicional, {left: 290, top: 287});
+		this.add(lblDiarioAlojam, {left: 170, top: 315});
 	}
 	
 	//txtAdicionalViatico.getChildControl("textfield").bind("value", lblAdicional, "value");
@@ -575,8 +590,6 @@ qx.Class.define("viaticos.viaticos.windowViatico",
 	//txtSubtotalViatico.bind("value", lblSubtotalViatico, "value");
 	
 	
-	var lblDiarioAlojam = new qx.ui.basic.Label("");
-	this.add(lblDiarioAlojam, {left: 170, top: 315});
 	//this.add(new qx.ui.basic.Label("*"), {left: 185, top: 311});
 	
 	//txtMontoDiarioAlojam.getChildControl("textfield").bind("value", lblDiarioAlojam, "value");
@@ -618,9 +631,19 @@ qx.Class.define("viaticos.viaticos.windowViatico",
 	var btnBorrar = new qx.ui.form.Button("Borrar");
 	btnBorrar.setEnabled(estado!="L");
 	btnBorrar.addListener("execute", function(e){
-		lstLocalidad.removeAll();
-		cboLocalidadSel.setValue("");
-		cboLocalidadSel.focus();
+		var index, length, children;
+		
+		if (! lstLocalidad.isSelectionEmpty()) {
+			index = lstLocalidad.indexOf(lstLocalidad.getSelection()[0]);
+			lstLocalidad.remove(lstLocalidad.getSelection()[0]);
+			children = lstLocalidad.getChildren();
+			length = children.length;
+			if (length > 0) {
+				if (index <= length - 1) lstLocalidad.setSelection([children[index]]); else lstLocalidad.setSelection([children[length - 1]]);
+			}
+			cboLocalidadSel.setValue("");
+			cboLocalidadSel.focus();
+		}
 	});
 	
 	
@@ -1160,6 +1183,7 @@ qx.Class.define("viaticos.viaticos.windowViatico",
 		
 		txtMontoDiarioViatico.setValue(resultado.viatico.monto_diario_viatico);
 		txtAdicionalViatico.setValue(resultado.viatico.adicional_viatico1);
+		txtMontoDiarioAlojam.setValue(resultado.viatico.monto_diario_alojam);
 		
 		if (json.aloj_emp == null) {
 			slbAloj_emp.setVisibility("hidden");

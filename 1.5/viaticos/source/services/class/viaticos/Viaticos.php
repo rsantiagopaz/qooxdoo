@@ -20,12 +20,13 @@ class class_Viaticos extends class_Base
   	$fecha_hasta = substr($p->model->fecha_hasta2, 0, 10) . " " . $p->model->hora_hasta2;
   	
 	if (!is_null($p->model->COD_VEHICULO) && $p->model->estado != "R") {
-	  	$sql = "SELECT id_viatico FROM viatico WHERE estado <> 'A' AND id_viatico <> '" . $p->model->id_viatico . "' AND documentacion_id <> '" . $p->model->documentacion_id . "' AND COD_VEHICULO='" . $p->model->COD_VEHICULO . "' AND GREATEST(ADDTIME(fecha_desde2, hora_desde2), '" . $fecha_desde . "') - LEAST(ADDTIME(fecha_hasta2, hora_hasta2), '" . $fecha_hasta . "') < 0";
+	  	$sql = "SELECT id_viatico, documentacion_id FROM viatico WHERE estado <> 'A' AND id_viatico <> '" . $p->model->id_viatico . "' AND documentacion_id <> '" . $p->model->documentacion_id . "' AND COD_VEHICULO='" . $p->model->COD_VEHICULO . "' AND GREATEST(ADDTIME(fecha_desde2, hora_desde2), '" . $fecha_desde . "') - LEAST(ADDTIME(fecha_hasta2, hora_hasta2), '" . $fecha_hasta . "') < 0";
 		$rs = mysql_query($sql);
 		if (mysql_num_rows($rs) > 0) {
+			$row = mysql_fetch_object($rs);
 			$item = new stdClass();
 			$item->descrip = "vehiculo";
-			$item->message = " El vehículo oficial seleccionado está asignado a otro viático en conflicto con el intervalo definido ";
+			$item->message = " El vehículo oficial seleccionado está asignado a viático " . $row->documentacion_id . " en conflicto con el intervalo definido ";
 			$resultado->error[] = $item;
 		}
 	}
@@ -309,9 +310,9 @@ class class_Viaticos extends class_Base
   	$opciones = array("funcionario"=>"bool", "eximir_tope_viatico"=>"bool");
   	
   	if (is_numeric($p->texto)) {
-		$sql = "SELECT CONCAT(dni, ' (', TRIM(apenom), ')') AS label, id_personal AS model, codigo_002, funcionario, eximir_tope_viatico FROM salud1._personal WHERE dni LIKE '" . $p->texto . "%' ORDER BY label";
+		$sql = "SELECT CONCAT(dni, ' (', TRIM(apenom), ')') AS label, id_personal AS model, codigo_002, funcionario, eximir_tope_viatico FROM salud1._personal WHERE NOT ISNULL(dni) AND NOT ISNULL(apenom) AND dni LIKE '" . $p->texto . "%' ORDER BY label";
   	} else {
-  		$sql = "SELECT CONCAT(TRIM(apenom), ' (', dni, ')') AS label, id_personal AS model, codigo_002, funcionario, eximir_tope_viatico FROM salud1._personal WHERE apenom LIKE '%" . $p->texto . "%' ORDER BY label";
+  		$sql = "SELECT CONCAT(TRIM(apenom), ' (', dni, ')') AS label, id_personal AS model, codigo_002, funcionario, eximir_tope_viatico FROM salud1._personal WHERE NOT ISNULL(dni) AND NOT ISNULL(apenom) AND apenom LIKE '%" . $p->texto . "%' ORDER BY label";
   	}
 	return $this->toJson($sql, $opciones);
   }
