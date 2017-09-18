@@ -177,9 +177,11 @@ qx.Class.define("viaticos.viaticos.pagePrincipal",
 		menutblPaciente.add(btn3);
 
 		var mnubtnNuevo = new qx.ui.form.MenuButton("Nuevo viatico", null, menutblPaciente);
+		mnubtnNuevo.setVisibility((application.rowOrganismo_area.perfiles["037007"]==null) ? "visible" : "hidden");
 		this.add(mnubtnNuevo, {left: 0, bottom: 0});
 		
 		var btnModificar = new qx.ui.form.Button("Modificar");
+		btnModificar.setVisibility((application.rowOrganismo_area.perfiles["037007"]==null) ? "visible" : "hidden");
 		btnModificar.setEnabled(false);
 		btnModificar.addListener("execute", function(e){
 			if (rowDataActual.tipo_viatico == "M") {
@@ -200,6 +202,7 @@ qx.Class.define("viaticos.viaticos.pagePrincipal",
 		this.add(btnModificar, {left: 150, bottom: 0});
 		
 		var btnLiquidar = new qx.ui.form.Button("Liquidar");
+		btnLiquidar.setVisibility((application.rowOrganismo_area.perfiles["037007"]==null) ? "visible" : "hidden");
 		btnLiquidar.setEnabled(false);
 		btnLiquidar.addListener("execute", function(e){
 			if (rowDataActual.tipo_viatico == "M") {
@@ -219,6 +222,7 @@ qx.Class.define("viaticos.viaticos.pagePrincipal",
 		this.add(btnLiquidar, {left: 300, bottom: 0});
 		
 		var btnRendir = new qx.ui.form.Button("Rendir");
+		btnRendir.setVisibility((application.rowOrganismo_area.perfiles["037007"]==null) ? "visible" : "hidden");
 		btnRendir.setEnabled(false);
 		btnRendir.addListener("execute", function(e){
 			var win = new viaticos.viaticos.windowRendicion(application, rowDataActual.id_viatico);
@@ -235,6 +239,7 @@ qx.Class.define("viaticos.viaticos.pagePrincipal",
 		this.add(btnRendir, {left: 400, bottom: 0});
 		
 		var btnCerrar = new qx.ui.form.Button("Cerrar");
+		btnCerrar.setVisibility((application.rowOrganismo_area.perfiles["037007"]==null) ? "visible" : "hidden");
 		btnCerrar.setEnabled(false);
 		btnCerrar.addListener("execute", function(e){
 			dialog.Dialog.confirm("ATENCIÓN: Desea cerrar el viático seleccionado?", function(e){
@@ -246,6 +251,7 @@ qx.Class.define("viaticos.viaticos.pagePrincipal",
 		this.add(btnCerrar, {left: 500, bottom: 0});
 		
 		var btnAnular = new qx.ui.form.Button("Anular");
+		btnAnular.setVisibility((application.rowOrganismo_area.perfiles["037007"]==null) ? "visible" : "hidden");
 		btnAnular.setEnabled(false);
 		btnAnular.addListener("execute", function(e){
 			dialog.Dialog.confirm("ATENCIÓN: Desea anular el viático seleccionado?", function(e){
