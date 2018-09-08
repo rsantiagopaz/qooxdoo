@@ -56,7 +56,7 @@ class class_login
         $this->_db->alter();
         if (mysql_error()) { $error->SetError(JsonRpcError_Unknown, mysql_error()); return $error; }
 		
-        $result = "";
+        $result = new stdClass;
         $result->servicios = $this->_db->loadResult();
 
         $aux = array();

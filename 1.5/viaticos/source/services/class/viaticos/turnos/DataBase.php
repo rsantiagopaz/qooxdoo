@@ -8,7 +8,8 @@ class DataBase {
 	public function __construct($server, $user, $password, $dbName){
 		$this->conexion = @mysql_connect($server, $user, $password);
 		mysql_select_db($dbName, $this->conexion);
-		$this->queries = 0;
+		//$this->queries = 0;
+		self::$queries = 0;
 		$this->resource = null;
 	}
 
@@ -16,7 +17,8 @@ class DataBase {
 		if(!($this->resource = mysql_query($this->sql, $this->conexion))){
 			return null;
 		}
-		$this->queries++;
+		//$this->queries++;
+		self::$queries++;
 		return $this->resource;
 	}
 
