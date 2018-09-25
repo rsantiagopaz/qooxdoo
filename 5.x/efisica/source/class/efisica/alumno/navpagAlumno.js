@@ -77,7 +77,7 @@ qx.Class.define("efisica.alumno.navpagAlumno",
 	
 	var txtTexto = new qx.ui.mobile.form.TextArea("");
 	txtTexto.setRequired(true);
-	formTexto.add(txtTexto, null, null, "texto");
+	formTexto.add(txtTexto, "", null, "texto");
 	
 	var btnGuardarTexto = new qx.ui.mobile.form.Button("Guardar");
 	btnGuardarTexto.addListener("tap", function(e){
@@ -89,7 +89,7 @@ qx.Class.define("efisica.alumno.navpagAlumno",
 			p.id_alumno = this.id_alumno;
 			p.tipo = "T";
 			p.texto = txtTexto.getValue();
-			
+
 			var rpc = new qx.io.remote.Rpc("services/", "comp.Alumno");
 			rpc.callAsync(qx.lang.Function.bind(function(resultado, error, id){
 				window.history.back();
@@ -137,6 +137,7 @@ qx.Class.define("efisica.alumno.navpagAlumno",
 			}, this, ["Aceptar", "Cancelar"]);
 		} else if (data.model == "texto") {
 			formTexto.reset();
+			//txtTexto.setValue("");
 			popupTexto.setTitle("Nuevo texto");
 			popupTexto.id_actividad = null;
 	

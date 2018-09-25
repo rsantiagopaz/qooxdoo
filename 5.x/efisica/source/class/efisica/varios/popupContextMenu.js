@@ -4,11 +4,12 @@ qx.Class.define("efisica.varios.popupContextMenu",
 
   construct : function(widgets, anchor)
   {
-   	this.base(arguments, null, anchor);
+   	//this.base(arguments, null, anchor);
    	
-	var composite = new qx.ui.mobile.container.Composite();
+	var composite = new qx.ui.mobile.container.Composite(new qx.ui.mobile.layout.VBox());
 	composite.addCssClass("list");
-	this.add(composite);
+	//this.add(composite);
+	this.base(arguments, composite, anchor);
    	
 	var functionWidget_tap = qx.lang.Function.bind(function(e) {
 		window.history.back();

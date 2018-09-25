@@ -29,7 +29,7 @@ qx.Class.define("efisica.page.Overview",
     {
       this.base(arguments);
 		
-	application = qx.core.Init.getApplication();
+	var application = qx.core.Init.getApplication();
 		
 		var dataAlumnos;
 		
@@ -57,7 +57,7 @@ qx.Class.define("efisica.page.Overview",
 		collapsibleAlumnos.add(listAlumnos);
 		this.getContent().add(collapsibleAlumnos);
 		
-		dataCursos = [
+		var dataCursos = [
 			{title: "Administrar", path: "cursos"}
 		];
 		
