@@ -51,7 +51,7 @@ qx.Class.define("efisica.Application",
       
       
       
-      this.getRoot().setFontScale(1.5);
+      //this.getRoot().setFontScale(1.5);
       
       
       

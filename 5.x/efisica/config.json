@@ -48,7 +48,7 @@
     "APPLICATION"  : "efisica",
     "APPLICATION_PATH" : "efisica",
     "QOOXDOO_PATH" : "../../../qooxdoo-5.0.2-sdk",
-    "LOCALES"      : [ "en" ],
+    "LOCALES"      : [ "es" ],
     "CACHE"        : "${TMPDIR}/qx${QOOXDOO_VERSION}/cache",
     "MOBILE_THEME" : "custom",
     "MOBILE_THEME_PATH" : "${APPLICATION_PATH}/css/${MOBILE_THEME}.css",

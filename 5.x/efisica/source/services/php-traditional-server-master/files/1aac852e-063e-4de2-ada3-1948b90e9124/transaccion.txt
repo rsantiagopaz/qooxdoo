@@ -1,0 +1,162 @@
+En pintao5 haciendo varias veces el comando
+SHOW ENGINE INNODB STATUS
+aparecen 2 tipos de pantallas. Una donde parece estar todo normal, sin ningun dato relevante. Y otra esta que pego abajo, siempre referido a una transaccion sobre el mismo registro
+No lo se interpretar bien, estaba viendo el tema. Me llama la atencion que aparezca siempre el mismo INSERT sobre una tabla cliente en pintaocentral, sobre el indice "tipodoc_dnicuit".
+
+Yo hice una prueba local en pintaocentral aver si las cadenas SQL estaban bien y si daban algun error de conflicto de indices, etc. Aparentemente todo figuraba bien, pero me llama la atencion que siempre en este SHOW ENGINE salga el mismo registro. Yo interpreto que es el estado del ENGINE INNODB en el momento de la transaccion de error, pero no se que es lo que esta poniendo en "waiting" los dos locks que figuran ahi.
+No se si vos podes intepretar algo de esto
+
+
+
+
+
+
+
+
+InnoDB 		
+=====================================
+160601 11:26:22 INNODB MONITOR OUTPUT
+=====================================
+Per second averages calculated from the last 17 seconds
+-----------------
+BACKGROUND THREAD
+-----------------
+srv_master_thread loops: 5171 1_second, 5171 sleeps, 469 10_second, 512 background, 512 flush
+srv_master_thread log flush and writes: 5214
+----------
+SEMAPHORES
+----------
+OS WAIT ARRAY INFO: reservation count 5683, signal count 5787
+Mutex spin waits 2360, rounds 12394, OS waits 78
+RW-shared spins 6319, rounds 183407, OS waits 5434
+RW-excl spins 152, rounds 2830, OS waits 66
+Spin rounds per wait: 5.25 mutex, 29.02 RW-shared, 18.62 RW-excl
+------------
+TRANSACTIONS
+------------
+Trx id counter 2181339
+Purge done for trx's n:o < 7A8823 undo n:o < 0
+History list length 393182
+LIST OF TRANSACTIONS FOR EACH SESSION:
+---TRANSACTION 0, not started
+MySQL thread id 14205, OS thread handle 0xa6c9ab70, query id 169428 localhost root
+SHOW ENGINE INNODB STATUS
+---TRANSACTION 2181332, not started
+MySQL thread id 14159, OS thread handle 0xa6d1cb70, query id 169215 localhost elpintao
+---TRANSACTION 2181335, ACTIVE 20 sec starting index read
+mysql tables in use 1, locked 1
+LOCK WAIT 2 lock struct(s), heap size 320, 1 row lock(s)
+MySQL thread id 14164, OS thread handle 0xa436cb70, query id 169264 pintao5.pintao 10.0.0.1 elpintao updating
+DELETE FROM transmision WHERE id_transmision=9231
+------- TRX HAS BEEN WAITING 20 SEC FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 0 page no 5700 n bits 104 index `PRIMARY` of table `elpintao`.`transmision` trx id 2181335 lock_mode X locks rec but not gap waiting
+Record lock, heap no 14 PHYSICAL RECORD: n_fields 6; compact format; info bits 32
+0: len 4; hex 8000240f; asc   $ ;;
+1: len 6; hex 0000007a881f; asc    z  ;;
+2: len 7; hex 15000002d02c5c; asc      ,\;;
+3: len 4; hex 80000001; asc     ;;
+4: len 0; hex ; asc ;;
+5: len 30; hex 494e5345525420636c69656e746573205345540d0a0909097469706f646f; asc INSERT clientes SET     tipodo; (total 488 bytes);
+
+------------------
+---TRANSACTION 2181334, ACTIVE 20 sec inserting
+mysql tables in use 1, locked 1
+LOCK WAIT 2 lock struct(s), heap size 320, 1 row lock(s), undo log entries 1
+MySQL thread id 14165, OS thread handle 0xa6aceb70, query id 169262 host33.190-136-112.telecom.net.ar 190.136.112.33 elpintao update
+INSERT clientes SET
+           tipodoc_dnicuit = '2-4972462',
+           tipo_doc = '2',
+           dni_cuit = '4972462',
+           razon_social = 'MARTA MARIA INSERRA',
+           condicion_iva = 'C',
+           dir_comercial = 'LEANDRO ALEM 425',
+           dir_particular = '',
+           tel_fijo = '',
+           cel = '',
+           email = ''
+           ON DUPLICATE KEY UPDATE
+           razon_social = 'MARTA MARIA INSERRA',
+           condicion_iva = 'C',
+           dir_comercial = 'LEANDRO ALEM 425',
+           dir_particular = '',
+           tel_fijo = '',
+           cel = '',
+           email = ''
+------- TRX HAS BEEN WAITING 20 SEC FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 0 page no 911 n bits 728 index `tipodoc_dnicuit` of table `elpintao`.`clientes` trx id 2181334 lock_mode X waiting
+Record lock, heap no 501 PHYSICAL RECORD: n_fields 2; compact format; info bits 0
+0: len 9; hex 322d34393732343632; asc 2-4972462;;
+1: len 4; hex 80005be0; asc   [ ;;
+
+------------------
+---TRANSACTION 13BD900, ACTIVE (PREPARED) 11855 sec recovered trx
+1 lock struct(s), heap size 320, 1 row lock(s), undo log entries 1
+---TRANSACTION 7A881F, ACTIVE (PREPARED) 11855 sec recovered trx
+1 lock struct(s), heap size 320, 1 row lock(s), undo log entries 1
+--------
+FILE I/O
+--------
+I/O thread 0 state: waiting for completed aio requests (insert buffer thread)
+I/O thread 1 state: waiting for completed aio requests (log thread)
+I/O thread 2 state: waiting for completed aio requests (read thread)
+I/O thread 3 state: waiting for completed aio requests (read thread)
+I/O thread 4 state: waiting for completed aio requests (read thread)
+I/O thread 5 state: waiting for completed aio requests (read thread)
+I/O thread 6 state: waiting for completed aio requests (write thread)
+I/O thread 7 state: waiting for completed aio requests (write thread)
+I/O thread 8 state: waiting for completed aio requests (write thread)
+I/O thread 9 state: waiting for completed aio requests (write thread)
+Pending normal aio reads: 0 [0, 0, 0, 0] , aio writes: 0 [0, 0, 0, 0] ,
+ibuf aio reads: 0, log i/o's: 0, sync i/o's: 0
+Pending flushes (fsync) log: 0; buffer pool: 0
+53337 OS file reads, 6181 OS file writes, 2393 OS fsyncs
+0.00 reads/s, 0 avg bytes/read, 0.65 writes/s, 0.18 fsyncs/s
+-------------------------------------
+INSERT BUFFER AND ADAPTIVE HASH INDEX
+-------------------------------------
+Ibuf: size 1, free list len 5, seg size 7, 392 merges
+merged operations:
+insert 391, delete mark 47, delete 0
+discarded operations:
+insert 0, delete mark 0, delete 0
+Hash table size 553193, node heap has 206 buffer(s)
+0.00 hash searches/s, 0.24 non-hash searches/s
+---
+LOG
+---
+Log sequence number 1432707831
+Log flushed up to   1432707831
+Last checkpoint at  1432707831
+0 pending log writes, 0 pending chkp writes
+1618 log i/o's done, 0.06 log i/o's/second
+----------------------
+BUFFER POOL AND MEMORY
+----------------------
+Total memory allocated 135987200; in additional pool allocated 0
+Dictionary memory allocated 569560
+Buffer pool size   8191
+Free buffers       0
+Database pages     7985
+Old database pages 2927
+Modified db pages  0
+Pending reads 0
+Pending writes: LRU 0, flush list 0, single page 0
+Pages made young 103351, not young 0
+0.00 youngs/s, 0.00 non-youngs/s
+Pages read 53326, created 31, written 4178
+0.00 reads/s, 0.00 creates/s, 0.53 writes/s
+Buffer pool hit rate 1000 / 1000, young-making rate 0 / 1000 not 0 / 1000
+Pages read ahead 0.00/s, evicted without access 0.00/s, Random read ahead 0.00/s
+LRU len: 7985, unzip_LRU len: 0
+I/O sum[14]:cur[0], unzip sum[0]:cur[0]
+--------------
+ROW OPERATIONS
+--------------
+0 queries inside InnoDB, 0 queries in queue
+1 read views open inside InnoDB
+Main thread process no. 3062, id 2793077616, state: waiting for server activity
+Number of rows inserted 876, updated 215, deleted 486, read 13239555
+0.00 inserts/s, 0.00 updates/s, 0.00 deletes/s, 0.12 reads/s
+----------------------------
+END OF INNODB MONITOR OUTPUT
+============================
