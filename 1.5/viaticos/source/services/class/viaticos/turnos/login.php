@@ -16,11 +16,11 @@ class class_login
 		require_once("DataBase.php");
 		$this->_version = $VERSION;
 		$this->_db = new DataBase($servidor,$usuario,$password,$base);
-		mysql_query("SET NAMES utf8");
+		$this->_db->conexion->query("SET NAMES utf8");
 		$this->_perfil_id = '037001';
 	}
 	
-	function method_Login($params, $error)
+	public function method_Login($params, $error)
     {
     	/*
 		$this->_db->setQuery("
@@ -54,7 +54,7 @@ class class_login
 		ORDER BY label
 		");
         $this->_db->alter();
-        if (mysql_error()) { $error->SetError(JsonRpcError_Unknown, mysql_error()); return $error; }
+        if ($this->_db->conexion->error) { $error->SetError(JsonRpcError_Unknown, $this->_db->conexion->error); return $error; }
 		
         $result = new stdClass;
         $result->servicios = $this->_db->loadResult();
@@ -87,12 +87,11 @@ class class_login
         }
     }
     
-    function method_Ingresar($params, $error)
-    {
-    	$_SESSION['id_sist_perfil_usuario_oas'] = $params[0]->servicio;
-	    $_SESSION['usuario'] = $params[0]->usuario;
-	    $_SESSION['organismo_area'] = $params[0]->organismo_area;
-    }
+	public function method_Ingresar($params, $error) {
+		$_SESSION['id_sist_perfil_usuario_oas'] = $params[0]->servicio;
+		$_SESSION['usuario'] = $params[0]->usuario;
+		$_SESSION['organismo_area'] = $params[0]->organismo_area;
+	}
     
 	function method_Logout()
     {
@@ -121,7 +120,7 @@ class class_login
     {
     	$this->_db->setQuery("UPDATE _usuarios SET SYSpassword = '" . md5($params[0]->password) . "' WHERE SYSusuario = '" . $_SESSION['usuario'] . "' AND SYSpassword = '" . md5($params[0]->actual) . "' LIMIT 1");
     	$this->_db->alter();
-    	if (mysql_affected_rows() > 0)
+    	if ($this->_db->conexion->affected_rows > 0)
     	{
     		return true;
     	}

@@ -1,29 +1,28 @@
 <?php
 class DataBase {
-	private $conexion;
-	private $resource;
+	public $conexion;
+	private $resour;
 	private $sql;
 	public static $queries;
 
 	public function __construct($server, $user, $password, $dbName){
-		$this->conexion = @mysql_connect($server, $user, $password);
-		mysql_select_db($dbName, $this->conexion);
+		$this->conexion = new mysqli("$server", "$user", "$password", "$dbName");
 		//$this->queries = 0;
 		self::$queries = 0;
-		$this->resource = null;
+		$this->resour = null;
 	}
 
 	public function execute(){
-		if(!($this->resource = mysql_query($this->sql, $this->conexion))){
+		if(!($this->resour = $this->conexion->query($this->sql))){
 			return null;
 		}
 		//$this->queries++;
 		self::$queries++;
-		return $this->resource;
+		return $this->resour;
 	}
 
 	public function alter(){
-		if(!($this->resource = mysql_query($this->sql, $this->conexion))){
+		if(!($this->resour = $this->conexion->query($this->sql))){
 			return false;
 		}
 		return true;
@@ -34,7 +33,7 @@ class DataBase {
 			return null;
 		}
 		$array = array();
-		while ($row = @mysql_fetch_object($cur)){
+		while ($row = $cur->fetch_object()){
 			$array[] = $row;
 		}
 		return $array;
@@ -49,14 +48,14 @@ class DataBase {
 	}
 
 	public function freeResults(){
-		@mysql_free_result($this->resource);
+		$this->resour->free();
 		return true;
 	}
 
 	public function loadObject(){
 		if ($cur = $this->execute()){
-			if ($object = mysql_fetch_object($cur)){
-				@mysql_free_result($cur);
+			if ($object = $cur->fetch_object()){
+				$cur->free();
 				return $object;
 			}
 			else {
@@ -69,8 +68,8 @@ class DataBase {
 	}
 
 	function __destruct(){
-		@mysql_free_result($this->resource);
-		@mysql_close($this->conexion);
+		//$this->resour->free();
+		$this->conexion->close();
 	}
 }
 ?>

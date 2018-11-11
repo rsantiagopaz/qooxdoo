@@ -4,9 +4,6 @@ require("Base.php");
 
 class class_Viaticos extends class_Base
 {
-  function __construct() {
-    parent::__construct();
-  }
   
   
   public function method_validar_alta_modifica_viatico($params, $error) {
@@ -21,9 +18,9 @@ class class_Viaticos extends class_Base
   	
 	if (!is_null($p->model->COD_VEHICULO) && $p->model->estado != "R") {
 	  	$sql = "SELECT id_viatico, documentacion_id FROM viatico WHERE estado <> 'A' AND id_viatico <> '" . $p->model->id_viatico . "' AND documentacion_id <> '" . $p->model->documentacion_id . "' AND COD_VEHICULO='" . $p->model->COD_VEHICULO . "' AND GREATEST(ADDTIME(fecha_desde2, hora_desde2), '" . $fecha_desde . "') - LEAST(ADDTIME(fecha_hasta2, hora_hasta2), '" . $fecha_hasta . "') < 0";
-		$rs = mysql_query($sql);
-		if (mysql_num_rows($rs) > 0) {
-			$row = mysql_fetch_object($rs);
+		$rs = $this->mysqli->query($sql);
+		if ($rs->num_rows > 0) {
+			$row = $rs->fetch_object();
 			$item = new stdClass();
 			$item->descrip = "vehiculo";
 			$item->message = " El vehículo oficial seleccionado está asignado a viático " . $row->documentacion_id . " en conflicto con el intervalo definido ";
@@ -32,8 +29,8 @@ class class_Viaticos extends class_Base
 	}
   	
   	$sql = "SELECT id_viatico FROM viatico WHERE estado <> 'A' AND id_viatico <> '" . $p->model->id_viatico . "' AND id_personal='" . $p->model->id_personal . "' AND GREATEST(ADDTIME(fecha_desde2, hora_desde2), '" . $fecha_desde . "') - LEAST(ADDTIME(fecha_hasta2, hora_hasta2), '" . $fecha_hasta . "') < 0";
-	$rs = mysql_query($sql);
-	if (mysql_num_rows($rs) > 0) {
+	$rs = $this->mysqli->query($sql);
+	if ($rs->num_rows > 0) {
 		$item = new stdClass();
 		$item->descrip = "intervalo";
 		$item->message = " El titular ya tiene un viático asignado que está en conflicto con este intervalo definido ";
@@ -43,17 +40,17 @@ class class_Viaticos extends class_Base
 
 	if ($p->validar_tope) {
 	  	$sql = "SELECT SUM(subtotal_viatico2) AS total, id_personal FROM viatico WHERE estado <> 'A' AND id_viatico <> '" . $p->model->id_viatico . "' AND id_personal='" . $p->model->id_personal . "' AND YEAR(fecha_desde2)=" . substr($fecha_desde, 0, 4) . " AND MONTH(fecha_desde2)=" . substr($fecha_desde, 5, 2) . " GROUP BY id_personal";
-		$rs = mysql_query($sql);
-		if (mysql_num_rows($rs) > 0) {
-			$row = mysql_fetch_object($rs);
+		$rs = $this->mysqli->query($sql);
+		if ($rs->num_rows > 0) {
+			$row = $rs->fetch_object();
 			$total = (float) $row->total;
 		} else {
 			$total = 0;
 		}
 		
 		$sql = "SELECT porc_tope_cargo FROM paramet WHERE id_paramet=1";
-		$rs = mysql_query($sql);
-		$row = mysql_fetch_object($rs);
+		$rs = $this->mysqli->query($sql);
+		$row = $rs->fetch_object();
 		$porc_tope_cargo = (float) $row->porc_tope_cargo;
 		
 		if ($total + $p->model->subtotal_viatico2 > $p->model->codigo_002per * $porc_tope_cargo / 100) {
@@ -67,11 +64,11 @@ class class_Viaticos extends class_Base
 	
 
 	$sql = "SELECT documentacion_id FROM salud1.001_documentaciones WHERE documentacion_id='" . $p->model->documentacion_id . "'";
-	$rs = mysql_query($sql);
-	$bool1 = (mysql_num_rows($rs)==0);
+	$rs = $this->mysqli->query($sql);
+	$bool1 = ($rs->num_rows==0);
 	$sql = "SELECT organismo_area_de_id, organismo_area_para_id FROM salud1.001_documentaciones_seguimientos WHERE documentacion_id='" . $p->model->documentacion_id . "' ORDER BY seguimiento_id_orden DESC LIMIT 1";
-	$rs = mysql_query($sql);
-	$row = mysql_fetch_object($rs);
+	$rs = $this->mysqli->query($sql);
+	$row = $rs->fetch_object();
 	$bool2 = ($row->organismo_area_de_id != $p->model->organismo_area_id || trim($row->organismo_area_para_id) != "");
 	if (($bool1 || $bool2) && $p->model->estado != "R") {
 		$item = new stdClass();
@@ -87,43 +84,43 @@ class class_Viaticos extends class_Base
 	if (count($resultado->error)==0) {
 		if ($p->model->con_funcionario && $p->model->estado=="E") {
 			$sql = "UPDATE salud1._personal SET codigo_002='" . $p->model->codigo_002fun . "' WHERE id_personal = '" . $p->model->id_funcionario . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		} else {
 			$p->model->id_funcionario = null;
 		}
 		
 		if ($p->model->estado=="E") {
 			$sql = "UPDATE salud1._personal SET codigo_002='" . $p->model->codigo_002per . "' WHERE id_personal = '" . $p->model->id_personal . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		}
 		
 		$resultado->id_viatico = $p->model->id_viatico;
 		if ($resultado->id_viatico=="0") {
 			$set = $this->prepararCampos($p->model, "viatico");
 			$sql = "INSERT viatico SET " . $set . ", fecha_tramite=NOW()";
-			mysql_query($sql);
-			$resultado->id_viatico = mysql_insert_id();
+			$this->mysqli->query($sql);
+			$resultado->id_viatico = $this->mysqli->insert_id;
 			if ($p->model->tipo_viatico=="A") {
 				$sql = "UPDATE paramet SET nro_viatico='" . $p->model->nro_viatico . "' WHERE id_paramet = 1";
-				mysql_query($sql);
+				$this->mysqli->query($sql);
 			}
 		} else {
 			if ($p->model->estado=="E") {
 				$sql="DELETE FROM viatico_localidad WHERE id_viatico='" . $resultado->id_viatico . "'";
-				mysql_query($sql);
+				$this->mysqli->query($sql);
 			}
 			
 			unset($p->model->organismo_area_id);
 			$set = $this->prepararCampos($p->model, "viatico");
 			
 			$sql = "UPDATE viatico SET " . $set . " WHERE id_viatico='" . $resultado->id_viatico . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		}
 		
 		if ($p->model->estado=="E") {
 			foreach ($p->localidad as $item) {
 				$sql = "INSERT viatico_localidad SET id_viatico='" . $resultado->id_viatico . "', localidad_id='" . $item . "'";
-				mysql_query($sql);
+				$this->mysqli->query($sql);
 			}
 		}
 	}
@@ -136,7 +133,7 @@ class class_Viaticos extends class_Base
   	$p = $params[0];
 
 	$sql = "UPDATE viatico SET estado = '" . $p->estado . "', json = '" . $p->json . "' WHERE id_viatico='" . $p->id_viatico . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
   }
   
   
@@ -145,7 +142,7 @@ class class_Viaticos extends class_Base
   	$set = $this->prepararCampos($p->model, "viatico");
 
 	$sql = "UPDATE viatico SET " . $set . " WHERE id_viatico='" . $p->model->id_viatico . "'";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
   }
     
   
@@ -242,18 +239,18 @@ class class_Viaticos extends class_Base
 	//$sql.= "(SELECT id_viatico, documentacion_id, fecha_tramite, organismo_area_id, organismo_area_id_origen, apenom, importe_total, viatico.json, tipo_viatico, estado, " . $tipo_descrip . ", " . $estado_descrip . " FROM viatico INNER JOIN salud1._personal USING(id_personal) WHERE TRUE" . $where . " AND viatico.documentacion_id LIKE '" . $p->filtrar . "%')";
 	$sql.= "(SELECT id_viatico, documentacion_id, DATE(fecha_tramite) AS fecha_tramite, organismo_area_id, organismo_area_id_origen, apenom, importe_total, tipo_viatico, estado, " . $tipo_descrip . ", " . $estado_descrip . " FROM viatico INNER JOIN salud1._personal USING(id_personal) WHERE TRUE" . $where . " AND viatico.documentacion_id LIKE '" . $p->filtrar . "%')";
 	$sql.= " ORDER BY fecha_tramite DESC";
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$row->importe_total = (float) $row->importe_total;
 		
 		$sql = "SELECT CONCAT(organismo_area, ' (', organismo, ')') AS label, organismo_area_id AS model FROM salud1._organismos_areas INNER JOIN salud1._organismos USING(organismo_id) WHERE organismo_area_id='" . $row->organismo_area_id . "'";
-		$rsAux = mysql_query($sql);
-		$rowAux = mysql_fetch_object($rsAux);
+		$rsAux = $this->mysqli->query($sql);
+		$rowAux = $rsAux->fetch_object();
 		$row->organismo_area = $rowAux->label;
 		
 		$sql = "SELECT CONCAT(organismo_area, ' (', organismo, ')') AS label, organismo_area_id AS model FROM salud1._organismos_areas INNER JOIN salud1._organismos USING(organismo_id) WHERE organismo_area_id='" . $row->organismo_area_id_origen . "'";
-		$rsAux = mysql_query($sql);
-		$rowAux = mysql_fetch_object($rsAux);
+		$rsAux = $this->mysqli->query($sql);
+		$rowAux = $rsAux->fetch_object();
 		$row->organismo_area_origen = $rowAux->label;
 	
 		$resultado[] = $row;
@@ -267,8 +264,8 @@ class class_Viaticos extends class_Base
   	$p = $params[0];
   	
 	$sql = "SELECT json FROM viatico WHERE id_viatico=" . $p->id_viatico;
-	$rs = mysql_query($sql);
-	$row = mysql_fetch_object($rs);
+	$rs = $this->mysqli->query($sql);
+	$row = $rs->fetch_object();
 	return $row;
   }
 
@@ -277,13 +274,13 @@ class class_Viaticos extends class_Base
   	$p = $params[0];
   	
 	$sql = "SELECT CONCAT(NRO_PAT, '  ', MARCA) AS label, COD_VEHICULO AS model FROM `017`.vehiculos WHERE NRO_PAT LIKE '%" . $p->texto . "%' ORDER BY label";
-	return $this->toJson(mysql_query($sql));
+	return $this->toJson($this->mysqli->query($sql));
   }
   
   
   public function method_autocompletarLocalidad($params, $error) {
   	$p = $params[0];
-  	//$rs = mysql_query("SELECT localidad_id AS id, CONCAT(localidad, ' (', departamento, ')') AS descrip FROM salud1._localidades INNER JOIN salud1._departamentos USING(departamento_id) WHERE " . (($_REQUEST['id']==null) ? "localidad LIKE '%" . $_REQUEST['descrip'] . "%'" : "localidad_id=" . $_REQUEST['id']));
+  	//$rs = $this->mysqli->query("SELECT localidad_id AS id, CONCAT(localidad, ' (', departamento, ')') AS descrip FROM salud1._localidades INNER JOIN salud1._departamentos USING(departamento_id) WHERE " . (($_REQUEST['id']==null) ? "localidad LIKE '%" . $_REQUEST['descrip'] . "%'" : "localidad_id=" . $_REQUEST['id']));
 	$sql = "SELECT CONCAT(localidad, ' (', departamento, ')') AS label, localidad_id AS model FROM salud1._localidades INNER JOIN salud1._departamentos USING(departamento_id) WHERE localidad LIKE '%" . $p->texto . "%' ORDER BY label";
 	return $this->toJson($sql);
   }
@@ -346,40 +343,40 @@ class class_Viaticos extends class_Base
   	
 	if ($p->model->con_funcionario && $p->model->estado=="E") {
 		$sql = "UPDATE salud1._personal SET codigo_002='" . $p->model->codigo_002fun . "' WHERE id_personal = '" . $p->model->id_funcionario . "'";
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 	} else {
 		$p->model->id_funcionario = null;
 	}
 	
 	if ($p->model->estado=="E") {
 		$sql = "UPDATE salud1._personal SET codigo_002='" . $p->model->codigo_002per . "' WHERE id_personal = '" . $p->model->id_personal . "'";
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 	}
 	
 	$set = $this->prepararCampos($p->model, "viatico");
 	$id_viatico = $p->model->id_viatico;
 	if ($id_viatico=="0") {
 		$sql = "INSERT viatico SET " . $set . ", fecha_tramite=NOW()";
-		mysql_query($sql);
-		$id_viatico = mysql_insert_id();
+		$this->mysqli->query($sql);
+		$id_viatico = $this->mysqli->insert_id;
 		if ($p->model->tipo_viatico=="A") {
 			$sql = "UPDATE paramet SET nro_viatico='" . $p->model->nro_viatico . "' WHERE id_paramet = 1";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		}
 	} else {
 		if ($p->model->estado=="E") {
 			$sql="DELETE FROM viatico_localidad WHERE id_viatico='" . $id_viatico . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		}
 		
 		$sql = "UPDATE viatico SET " . $set . " WHERE id_viatico='" . $id_viatico . "'";
-		mysql_query($sql);
+		$this->mysqli->query($sql);
 	}
 	
 	if ($p->model->estado=="E") {
 		foreach ($p->localidad as $item) {
 			$sql = "INSERT viatico_localidad SET id_viatico='" . $id_viatico . "', localidad_id='" . $item . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		}
 	}
 	
@@ -406,25 +403,25 @@ class class_Viaticos extends class_Base
   	
   	$cambios = $p->cambios;
   	
-	mysql_query("START TRANSACTION");
+	$this->mysqli->query("START TRANSACTION");
 	
 	foreach ($cambios->altas as $item) {
 		$sql="INSERT INTO motivo SET descrip='" . $item->descrip . "'";
-		mysql_query($sql);
-		if (mysql_errno()) break;
+		$this->mysqli->query($sql);
+		if ($this->mysqli->errno) break;
 	}
-	if (! mysql_errno()) {
+	if (! $this->mysqli->errno) {
 		foreach ($cambios->modificados as $item) {
 			$sql="UPDATE motivo SET descrip='" . $item->descrip . "' WHERE id_motivo='" . $item->id_motivo . "'";
-			mysql_query($sql);
-			if (mysql_errno()) break;
+			$this->mysqli->query($sql);
+			if ($this->mysqli->errno) break;
 		}	
 	}
-	if (mysql_errno()) {
-		mysql_query("ROLLBACK");
-		return mysql_error();
+	if ($this->mysqli->errno) {
+		$this->mysqli->query("ROLLBACK");
+		return $this->mysqli->error;
 	} else {
-		mysql_query("COMMIT");
+		$this->mysqli->query("COMMIT");
 	}
   }
 
@@ -447,7 +444,7 @@ class class_Viaticos extends class_Base
 
 	$set = $this->prepararCampos($p);
 	$sql = "UPDATE paramet SET " . $set . " WHERE id_paramet=1";
-	mysql_query($sql);
+	$this->mysqli->query($sql);
   }
   
   
@@ -457,22 +454,22 @@ class class_Viaticos extends class_Base
   	$cambios = $p->cambios;
   	
   	try {
-		mysql_query("START TRANSACTION");
+		$this->mysqli->query("START TRANSACTION");
 		
 		foreach ($cambios->altas as $item) {
 			$sql="INSERT INTO cta_cte SET descrip='" . $item->descrip . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		}
 	
 		foreach ($cambios->modificados as $item) {
 			$sql="UPDATE cta_cte SET descrip='" . $item->descrip . "' WHERE id_cta_cte='" . $item->id_cta_cte . "'";
-			mysql_query($sql);
+			$this->mysqli->query($sql);
 		}	
 	
-		mysql_query("COMMIT");
+		$this->mysqli->query("COMMIT");
 	
 	} catch (Exception $e) {
-		mysql_query("ROLLBACK");
+		$this->mysqli->query("ROLLBACK");
 	}
   }
   
@@ -490,7 +487,7 @@ class class_Viaticos extends class_Base
   	$p = $params[0];
   	
 	$sql = "UPDATE salud1._personal SET codigo_002=" . $p->codigo_002 . ", funcionario=" . (($p->funcionario) ? "TRUE" : "FALSE") . ", eximir_tope_viatico=" . (($p->eximir_tope_viatico) ? "TRUE" : "FALSE") . " WHERE id_personal=" . $p->id_personal;
-	mysql_query($sql);
+	$this->mysqli->query($sql);
   }
   
   public function method_leer_titulares($params, $error) {
@@ -499,8 +496,8 @@ class class_Viaticos extends class_Base
   	$resultado = array();
   	
 	$sql = "SELECT CONCAT(TRIM(apenom), ' (', dni, ')') AS label FROM viatico INNER JOIN salud1._personal USING(id_personal) WHERE documentacion_id='" . $p . "' ORDER BY apenom";
-	$rs = mysql_query($sql);
-	while ($row = mysql_fetch_object($rs)) {
+	$rs = $this->mysqli->query($sql);
+	while ($row = $rs->fetch_object()) {
 		$resultado[] = $row->label;
 	}
 	

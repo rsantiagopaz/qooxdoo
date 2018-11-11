@@ -16,7 +16,7 @@ $base = "viaticos";
 
 
 /*
-$servidor = "localhost";
+$servidor = "10.1.1.4";
 $usuario = "viaticos";
 $password = "plata!salud!";
 $base = "viaticos";

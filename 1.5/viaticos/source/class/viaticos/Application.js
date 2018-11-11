@@ -76,7 +76,8 @@ qx.Class.define("viaticos.Application",
 			var params = new Object();
 			params.version = "3.1.449";
 			
-			var result = rpc.callSync("Logueado", params);
+			//var result = rpc.callSync("Logueado", params);
+			var result = false;
 
 			if (!result) {
 				viaticos.Application.Login("Identificacion de Usuario", "", this._InitAPP, this);
