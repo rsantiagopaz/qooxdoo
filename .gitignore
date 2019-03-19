@@ -3,9 +3,7 @@
 script/
 build/
 .metadata/
-.git
-.gitattributes
-.gitignore
+node_modules/
 
 
 
