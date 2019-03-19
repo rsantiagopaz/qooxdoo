@@ -173,14 +173,14 @@ qx.Class.define("efisica.alumno.navpagAlumno",
 	        		p.uuid = responseJSON.uuid;
 	        		p.uploadName = responseJSON.uploadName;
 	        		
-	        		alert(qx.lang.Json.stringify(p, null, 2));
+	        		//alert(qx.lang.Json.stringify(p, null, 2));
 	        		
 					var rpc = new qx.io.remote.Rpc("services/", "comp.Alumno");
 					rpc.callAsync(qx.lang.Function.bind(function(resultado, error, id){
 						application.popupCargando.ocultarModal();
 						
-						alert(qx.lang.Json.stringify(resultado, null, 2));
-						alert(qx.lang.Json.stringify(error, null, 2));
+						//alert(qx.lang.Json.stringify(resultado, null, 2));
+						//alert(qx.lang.Json.stringify(error, null, 2));
 						
 						this.actualizar();
 					}, this), "agregar_documento", p);
